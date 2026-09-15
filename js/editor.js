@@ -1,5 +1,5 @@
 import { confirmDialog } from "./confirm.js";
-import { clear, h, linkifyContact } from "./dom.js";
+import { clear, h, icon, linkifyContact } from "./dom.js";
 import {
   copyBase64,
   copyText,
@@ -263,7 +263,7 @@ export function mountEditor(refs, selection) {
               flash(card, "Copied");
             },
           },
-          "Copy text",
+          [icon("copy"), "Copy text"],
         ),
         h(
           "button",
@@ -276,7 +276,7 @@ export function mountEditor(refs, selection) {
               flash(card, "Copied");
             },
           },
-          "Copy base64",
+          [icon("copy"), "Copy base64"],
         ),
         h(
           "button",
@@ -288,7 +288,7 @@ export function mountEditor(refs, selection) {
               downloadFile(filename, pre.textContent);
             },
           },
-          "Save to disk",
+          [icon("download"), "Save to disk"],
         ),
       ]),
     ]);

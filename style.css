@@ -390,18 +390,32 @@ main {
   border-radius: var(--radius-sm);
   object-fit: cover;
 }
+.editor-tabs {
+  display: none;
+  width: fit-content;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.editor-tabs .btn {
+  border: none;
+  border-radius: 0;
+}
+.editor-tabs .btn[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .editor-body {
   display: grid;
   grid-template-columns: minmax(280px, 380px) 1fr;
   gap: 1.5rem;
-  align-items: start;
-}
-@media (max-width: 860px) {
-  .editor-body {
-    grid-template-columns: 1fr;
-  }
+  height: calc(100vh - 15rem);
 }
 
+/* Desktop: fixed two-pane grid, each pane capped to the viewport and scrolling on its
+   own — the page itself never needs to scroll for a long field list or preview. */
 #config-form-panel,
 #preview-panel {
   background: var(--surface);
@@ -409,12 +423,27 @@ main {
   border-radius: var(--radius);
   padding: 1.25rem;
   box-shadow: var(--shadow);
-}
-#config-form-panel {
-  position: sticky;
-  top: 5.5rem;
-  max-height: calc(100vh - 7rem);
   overflow-y: auto;
+}
+
+@media (max-width: 860px) {
+  /* Mobile: no room for two panes, so only one is shown at a time, switched via the
+     Configuration/Preview tabs above. Each just flows with the page normally. */
+  .editor-tabs {
+    display: flex;
+  }
+  .editor-body {
+    grid-template-columns: 1fr;
+  }
+  #config-form-panel,
+  #preview-panel {
+    max-height: none;
+    overflow-y: visible;
+  }
+  #config-form-panel[data-tab-hidden],
+  #preview-panel[data-tab-hidden] {
+    display: none;
+  }
 }
 
 .field {
@@ -488,10 +517,19 @@ main {
   flex-direction: column;
   gap: 1rem;
 }
+/* Preview cards always render in a dark, code-editor-style theme regardless of the
+   site's light/dark mode — code reads better on a fixed dark background than one that
+   flips, and it visually sets rendered output apart from the surrounding chrome. */
 .preview-card {
-  border: 1px solid var(--border);
+  --preview-bg: #12141c;
+  --preview-bg-2: #191c26;
+  --preview-border: #2a2e3a;
+  --preview-text: #e3e6ed;
+  --preview-text-muted: #8890a3;
+  border: 1px solid var(--preview-border);
   border-radius: var(--radius);
-  background: var(--surface-2);
+  background: var(--preview-bg);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 .preview-card-header {
@@ -499,30 +537,61 @@ main {
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.7rem 1rem;
-  border-bottom: 1px solid var(--border);
+  background: var(--preview-bg-2);
+  border-bottom: 1px solid var(--preview-border);
+  color: var(--preview-text);
+}
+.preview-card-header .muted {
+  color: var(--preview-text-muted);
 }
 .preview-content {
   margin: 0;
   padding: 1rem;
   font-family: var(--mono);
   font-size: 0.82em;
+  color: var(--preview-text);
   white-space: pre-wrap;
   word-break: break-word;
   overflow-x: auto;
   max-height: 340px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--preview-border) transparent;
 }
 .preview-card-actions {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
   padding: 0.6rem 1rem;
-  border-top: 1px solid var(--border);
+  background: var(--preview-bg-2);
+  border-top: 1px solid var(--preview-border);
   flex-wrap: wrap;
+  align-items: center;
   position: relative;
 }
+.preview-card-actions .btn {
+  background: color-mix(in srgb, white 6%, transparent);
+  border-color: color-mix(in srgb, white 14%, transparent);
+  color: var(--preview-text);
+}
+.preview-card-actions .btn svg {
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.preview-card-actions .btn:hover {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+.preview-card-actions .btn:hover svg {
+  opacity: 1;
+}
+.preview-card-actions .btn:active {
+  transform: translateY(1px);
+}
 .flash-note {
-  color: var(--ok);
+  color: #5fd189;
   font-size: 0.8em;
+  font-weight: 600;
   align-self: center;
 }
 

@@ -32,6 +32,10 @@ const dom = {
   btnSyncAll: document.getElementById("btn-sync-all"),
   btnAddRemote: document.getElementById("btn-add-remote"),
   btnAddLocal: document.getElementById("btn-add-local"),
+  tabConfig: document.getElementById("tab-config"),
+  tabPreview: document.getElementById("tab-preview"),
+  configFormPanel: document.getElementById("config-form-panel"),
+  previewPanel: document.getElementById("preview-panel"),
   editor: {
     titleEl: document.getElementById("editor-title"),
     metaEl: document.getElementById("editor-meta"),
@@ -42,6 +46,18 @@ const dom = {
     replaceHintEl: document.getElementById("replace-disk-hint"),
   },
 };
+
+// Mobile only (see the max-width: 860px rule in style.css) — on desktop both panels are
+// always visible via the CSS grid and this attribute has no effect.
+function setEditorTab(tab) {
+  const isConfig = tab === "config";
+  dom.tabConfig.setAttribute("aria-pressed", String(isConfig));
+  dom.tabPreview.setAttribute("aria-pressed", String(!isConfig));
+  dom.configFormPanel.toggleAttribute("data-tab-hidden", !isConfig);
+  dom.previewPanel.toggleAttribute("data-tab-hidden", isConfig);
+}
+dom.tabConfig.addEventListener("click", () => setEditorTab("config"));
+dom.tabPreview.addEventListener("click", () => setEditorTab("preview"));
 
 function showGlobalMessage(text, kind = "error") {
   dom.globalMessage.textContent = text;
@@ -67,6 +83,7 @@ function switchView(view) {
 
 function openEditor(selection) {
   mountEditor(dom.editor, selection);
+  setEditorTab("config");
   switchView("editor");
   dom.viewEditor.scrollTo(0, 0);
 }

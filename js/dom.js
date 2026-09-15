@@ -26,6 +26,28 @@ export function clear(el) {
   while (el.firstChild) el.removeChild(el.firstChild);
 }
 
+const ICON_PATHS = {
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  download: '<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 19h14"/>',
+};
+
+// Small stroke-style (feather-icon-ish) SVGs for button labels — kept tiny and inline
+// rather than pulled from an icon font/library, matching this project's zero-dependency,
+// no-build-step approach.
+export function icon(name, size = 14) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", String(size));
+  svg.setAttribute("height", String(size));
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "2");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.innerHTML = ICON_PATHS[name] || "";
+  return svg;
+}
+
 const CONTACT_RE = /^(.+?)\s*<([^\s<>]+@[^\s<>]+)>?\s*$/;
 
 // Turns a "Name <email@example.com>" contact string into `Name <mailto-link>`.
