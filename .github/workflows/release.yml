@@ -1,0 +1,58 @@
+name: Release
+
+# Only the files actually needed to serve the static site are included — not
+# README.md/TEMPLATE_SCHEMA.md (docs) or anything else in the repo.
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  zip-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create release directory
+        run: |
+          mkdir build && \
+          cp index.html \
+            style.css \
+            config.json \
+            js \
+            templates \
+            build/
+
+      - name: Zip deployment files
+        run: |
+          zip -r "cloud-init-config-${{ github.event.release.tag_name }}.zip" \
+            build/*
+
+      - name: Upload zip to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "cloud-init-config-${{ github.event.release.tag_name }}.zip" \
+            --clobber
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: 'build'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
