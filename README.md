@@ -33,6 +33,16 @@ Idk. Use it if you want.
 - **The editor has its own URL** (`/editor/?source=...`), so opening a template, using the
   browser's back/forward buttons, and reloading mid-edit all work normally — no client-side
   router, still a fully static build.
+- **A template creator** at `/new` ("+ New template" in the header) for building a template
+  JSON from scratch, in the same two-column layout as the editor: variables (with type,
+  default, description, and per-type restrictions) on the left along with one entry per
+  output file — restricted to `user-data`, `meta-data`, and `network-config`, the only
+  filenames cloud-init's NoCloud/ConfigDrive datasource actually reads off the boot
+  partition — with a live syntax-highlighted preview of each file's raw YAML on the right.
+  Drag-and-drop icon upload, a collapsible template-details card (reusing the same card
+  used for the browse view's list layout), live YAML-syntax checking of each file's
+  content, and a check that every `__key__` a file uses is actually defined as a variable.
+  Export via copy to clipboard or save to disk.
 - **Validated fields** for IPv4/IPv6, CIDR, MAC, hostnames/FQDNs, ports, UUIDs, dates and
   RFC 3339 timestamps, SSH public keys (RSA/Ed25519/ECDSA/…), base64, JSON, and more —
   see the full list in [TEMPLATE_SCHEMA.md](TEMPLATE_SCHEMA.md#field-types).
@@ -91,6 +101,20 @@ Pages, before the first deploy).
    at once: **Replace files on boot partition…**, which asks for a folder (e.g. a
    Raspberry Pi's boot partition) and writes every file into it after checking it actually
    looks like the right folder.
+7. **Create (or resume editing) a template** — "+ New template" opens the creator at
+   `/new`. Fill in the template's name/author/version and drag-and-drop (or click to pick)
+   an icon image; collapse **Template details** down to a preview card once it's filled in
+   to free up space. Add variables (key, label, type, required, default, description, and
+   type-specific restrictions like min/max or a pattern), and add any of the three files
+   cloud-init recognizes (`user-data`, `meta-data`, `network-config`) with its raw YAML
+   content (`__key__` placeholders, checked for valid YAML syntax as you type, with a live
+   highlighted preview on the right). An issues panel flags any `__key__` a file uses that
+   isn't defined as a variable. **Open template…** loads an existing template JSON back
+   into the creator to keep editing it (starting with **Template details** collapsed,
+   since it's presumably already filled in) — anything that isn't one of the three
+   recognized filenames is skipped with a warning, since the creator can't represent it.
+   **Copy JSON** / **Save to disk** produce the template file — warning first, but not
+   blocking, if something looks off.
 
 ## Requirements
 
@@ -121,8 +145,11 @@ public/
 src/
   index.html                browse view (site root)
   editor/index.html          editor view, at /editor/ — template selected via ?source=... query params
+  new/index.html              template creator, at /new/
   main.ts                    browse page: state, wiring, page init
   editor-main.ts              editor page: resolves ?source=... to a template, mounts the editor
+  new-main.ts                 creator page: DOM wiring for creator.ts's model/validation
+  creator.ts                  creator's draft model, validation (semver/author/keys/YAML), JSON export
   routes.ts                  encodes/decodes the editor URL's query params
   site.ts                    loads config.json + the (optional) site template repo
   store.ts                   IndexedDB-backed repo/template fetching & caching
@@ -138,13 +165,13 @@ src/
   syntax-highlight.ts          wrapper around highlight.js (npm dependency), core + YAML grammar only
   types.ts                    shared TypeScript types for config.json / index.json / template files
   style.css                   shell + theme
-vite.config.ts              multi-page build (src/index.html + src/editor/index.html), @ alias, public dir
+vite.config.ts              multi-page build (index.html + editor/ + new/), @ alias, public dir
 TEMPLATE_SCHEMA.md          schema reference for config.json / index.json / template files
 ```
 
 `pnpm build` type-checks `src/` and bundles everything above into a static `dist/`
-directory (`dist/index.html`, `dist/editor/`, `dist/assets/`, plus `config.json` and
-`templates/` copied as-is from `public/`).
+directory (`dist/index.html`, `dist/editor/`, `dist/new/`, `dist/assets/`, plus
+`config.json` and `templates/` copied as-is from `public/`).
 
 ## Writing templates
 

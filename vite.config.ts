@@ -24,6 +24,7 @@ export default defineConfig({
       input: {
         main: resolve(root, "index.html"),
         editor: resolve(root, "editor/index.html"),
+        new: resolve(root, "new/index.html"),
       },
     },
   },

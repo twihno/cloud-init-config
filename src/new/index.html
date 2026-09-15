@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New template – Cloud-Init Config</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header id="app-header">
+      <div class="header-inner">
+        <div class="header-title">
+          <a href="/" class="btn btn-ghost">&larr; Back</a>
+        </div>
+        <div class="header-actions">
+          <div class="header-actions-group">
+            <button type="button" id="btn-open-template" class="btn btn-ghost">
+              Open template&hellip;
+            </button>
+            <input type="file" id="open-template-input" accept="application/json,.json" hidden />
+            <button type="button" id="btn-copy-json" class="btn btn-ghost flash-anchor">
+              Copy JSON
+            </button>
+            <button type="button" id="btn-save-json" class="btn btn-primary flash-anchor">
+              Save to disk
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="view-creator">
+      <div class="editor-tabs" role="group" aria-label="Editor view">
+        <button type="button" id="tab-config" class="btn btn-ghost" aria-pressed="true">
+          Configuration
+        </button>
+        <button type="button" id="tab-preview" class="btn btn-ghost" aria-pressed="false">
+          Preview
+        </button>
+      </div>
+
+      <div class="editor-body">
+        <aside id="config-form-panel">
+          <section id="meta-section" class="repo-section">
+            <div class="repo-section-header">
+              <div class="repo-section-heading">
+                <h3>Template details</h3>
+              </div>
+              <div class="repo-actions">
+                <button type="button" id="btn-toggle-meta" class="btn btn-ghost btn-small">
+                  Collapse
+                </button>
+              </div>
+            </div>
+
+            <div id="meta-preview" class="card-list" hidden></div>
+
+            <div id="meta-form">
+              <div class="field">
+                <label for="meta-name">Name</label>
+                <div class="field-control">
+                  <input type="text" id="meta-name" placeholder="Raspberry Pi" autocomplete="off" />
+                </div>
+                <p id="meta-name-error" class="field-error" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="meta-author">Author <span class="muted">(optional)</span></label>
+                <div class="field-control">
+                  <input
+                    type="text"
+                    id="meta-author"
+                    placeholder="Jane Doe <jane@example.com>"
+                    autocomplete="off"
+                  />
+                </div>
+                <p id="meta-author-error" class="field-error" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="meta-version">Version <span class="muted">(optional)</span></label>
+                <div class="field-control">
+                  <input type="text" id="meta-version" placeholder="1.0.0" autocomplete="off" />
+                </div>
+                <p id="meta-version-error" class="field-error" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="meta-icon-input">Icon <span class="muted">(optional)</span></label>
+                <label id="icon-dropzone" for="meta-icon-input" class="dropzone">
+                  <img id="meta-icon-preview" class="creator-icon-preview" alt="" hidden />
+                  <span id="icon-dropzone-text"
+                    >Drag &amp; drop an image here, or click to choose</span
+                  >
+                  <input type="file" id="meta-icon-input" accept="image/*" hidden />
+                </label>
+                <div class="creator-row-actions">
+                  <button type="button" id="meta-icon-clear" class="btn btn-ghost btn-small" hidden>
+                    Remove icon
+                  </button>
+                </div>
+                <p id="meta-icon-error" class="field-error" hidden></p>
+              </div>
+            </div>
+          </section>
+
+          <section class="repo-section">
+            <div class="repo-section-header">
+              <div class="repo-section-heading">
+                <h3>Variables</h3>
+                <p class="muted">
+                  Shared inputs, filled in once per config and substituted as __key__.
+                </p>
+              </div>
+              <div class="repo-actions">
+                <button type="button" id="btn-add-variable" class="btn btn-ghost">
+                  + Add variable
+                </button>
+              </div>
+            </div>
+            <div id="variables-list"></div>
+          </section>
+
+          <section class="repo-section">
+            <div class="repo-section-header">
+              <div class="repo-section-heading">
+                <h3>Files</h3>
+                <p class="muted">
+                  cloud-init only ever reads these three filenames off the boot partition.
+                </p>
+              </div>
+              <div id="add-file-actions" class="repo-actions"></div>
+            </div>
+            <div id="files-list"></div>
+          </section>
+        </aside>
+
+        <section id="preview-panel">
+          <div id="creator-issues" class="repo-section" hidden>
+            <div class="repo-section-header">
+              <div class="repo-section-heading">
+                <h3>Issues</h3>
+                <p class="muted">
+                  Undefined/unused variables — these don't block export, just double-check them.
+                </p>
+              </div>
+            </div>
+            <ul id="issues-list" class="import-results"></ul>
+          </div>
+          <div id="preview-cards"></div>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="/new-main.ts"></script>
+  </body>
+</html>

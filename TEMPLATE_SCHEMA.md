@@ -67,12 +67,21 @@ Fetched fresh on every page load.
 
 - `icon` (optional) — a `data:image/...;base64,...` URL, shown on the card and in the
   editor header. Anything else (or a missing icon) falls back to a generic icon.
-- `templates` — one entry per **output file** (`user-data`, `meta-data`, `network-config`,
-  …). Each entry:
+- `templates` — one entry per **output file**. Each entry:
   - `filename` (optional) — the name written to disk / used for downloads. Defaults to the
     object's key if omitted.
   - `content` — the raw file content with `__key__` placeholders.
   - `fields` — the inputs that fill those placeholders (see below).
+
+  This schema itself doesn't constrain the entry keys/filenames — the app will load and
+  render whatever you put here. But if the target is a real cloud-init boot partition,
+  cloud-init's NoCloud/ConfigDrive datasource only ever reads a fixed set of filenames:
+  `user-data`, `meta-data`, `network-config`, and (rarely used) `vendor-data`. Anything
+  else on the partition is simply ignored by cloud-init. The app's **+ New template** page
+  enforces this — it only lets you add `user-data`, `meta-data`, and `network-config` —
+  but a hand-written template file is not restricted to those three if you have another
+  use for the extra output files (e.g. Raspberry Pi's `config.txt`/`cmdline.txt`, handled
+  separately by "Replace files on boot partition").
 
 ### Shared fields
 

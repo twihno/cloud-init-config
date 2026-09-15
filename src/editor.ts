@@ -332,7 +332,7 @@ export function mountEditor(refs: EditorRefs, template: Template): void {
 // `position: relative`) so it never pushes the card's layout around. Deliberately
 // class-toggled rather than touching el.style — the deployment CSP locks style-src to
 // 'self' with no 'unsafe-inline', which covers inline style attributes/CSSOM writes too.
-function flash(anchor: HTMLElement, text: string): void {
+export function flash(anchor: HTMLElement, text: string): void {
   anchor.querySelector(".flash-note")?.remove();
   const note = h("span", { class: "flash-note" }, text);
   anchor.appendChild(note);
