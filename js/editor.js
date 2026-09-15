@@ -246,52 +246,56 @@ export function mountEditor(refs, selection) {
     const filename = getSubTemplateFilename(key, sub);
     const pre = h("pre", { class: "preview-content" });
     previewEls[key] = pre;
+    // Declared before the buttons below so their onclick closures can reference it —
+    // by the time a click actually fires, actionsBar has long since been assigned.
+    let actionsBar;
+    actionsBar = h("div", { class: "preview-card-actions" }, [
+      h(
+        "button",
+        {
+          type: "button",
+          class: "btn btn-ghost btn-small",
+          onclick: async () => {
+            if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
+            await copyText(pre.textContent);
+            flash(actionsBar, "Copied");
+          },
+        },
+        [icon("copy"), "Copy text"],
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          class: "btn btn-ghost btn-small",
+          onclick: async () => {
+            if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
+            await copyBase64(pre.textContent);
+            flash(actionsBar, "Copied");
+          },
+        },
+        [icon("copy"), "Copy base64"],
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          class: "btn btn-ghost btn-small",
+          onclick: async () => {
+            if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
+            downloadFile(filename, pre.textContent);
+          },
+        },
+        [icon("download"), "Save to disk"],
+      ),
+    ]);
     const card = h("article", { class: "preview-card" }, [
       h("div", { class: "preview-card-header" }, [
         h("h4", {}, filename),
         key !== filename ? h("span", { class: "muted" }, key) : null,
       ]),
       pre,
-      h("div", { class: "preview-card-actions" }, [
-        h(
-          "button",
-          {
-            type: "button",
-            class: "btn btn-ghost btn-small",
-            onclick: async () => {
-              if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
-              await copyText(pre.textContent);
-              flash(card, "Copied");
-            },
-          },
-          [icon("copy"), "Copy text"],
-        ),
-        h(
-          "button",
-          {
-            type: "button",
-            class: "btn btn-ghost btn-small",
-            onclick: async () => {
-              if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
-              await copyBase64(pre.textContent);
-              flash(card, "Copied");
-            },
-          },
-          [icon("copy"), "Copy base64"],
-        ),
-        h(
-          "button",
-          {
-            type: "button",
-            class: "btn btn-ghost btn-small",
-            onclick: async () => {
-              if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
-              downloadFile(filename, pre.textContent);
-            },
-          },
-          [icon("download"), "Save to disk"],
-        ),
-      ]),
+      actionsBar,
     ]);
     refs.previewCardsEl.appendChild(card);
   }
@@ -322,8 +326,17 @@ export function mountEditor(refs, selection) {
   };
 }
 
-function flash(card, text) {
+// Floating "Copied" popup, absolutely positioned over `anchor` (which must be
+// `position: relative`) so it never pushes the card's layout around. Deliberately
+// class-toggled rather than touching el.style — the deployment CSP locks style-src to
+// 'self' with no 'unsafe-inline', which covers inline style attributes/CSSOM writes too.
+function flash(anchor, text) {
+  anchor.querySelector(".flash-note")?.remove();
   const note = h("span", { class: "flash-note" }, text);
-  card.appendChild(note);
-  setTimeout(() => note.remove(), 1200);
+  anchor.appendChild(note);
+  requestAnimationFrame(() => note.classList.add("flash-note-visible"));
+  setTimeout(() => {
+    note.classList.remove("flash-note-visible");
+    note.addEventListener("transitionend", () => note.remove(), { once: true });
+  }, 1000);
 }
