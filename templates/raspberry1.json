@@ -1,0 +1,136 @@
+{
+  "name": "Raspberry Pi",
+  "author": "Max Mustermann <max.mustermann@example.com>",
+  "version": "1.0.0",
+  "icon": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHJ4PSIxMiIgZmlsbD0iIzBmNmIzYyIvPgogIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2M5ZjVkOSIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgICA8cmVjdCB4PSIxNiIgeT0iMTYiIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgcng9IjQiLz4KICAgIDxjaXJjbGUgY3g9IjI0IiBjeT0iMjQiIHI9IjIuNCIgZmlsbD0iI2M5ZjVkOSIgc3Ryb2tlPSJub25lIi8+CiAgICA8Y2lyY2xlIGN4PSI0MCIgY3k9IjI0IiByPSIyLjQiIGZpbGw9IiNjOWY1ZDkiIHN0cm9rZT0ibm9uZSIvPgogICAgPGNpcmNsZSBjeD0iMjQiIGN5PSI0MCIgcj0iMi40IiBmaWxsPSIjYzlmNWQ5IiBzdHJva2U9Im5vbmUiLz4KICAgIDxjaXJjbGUgY3g9IjQwIiBjeT0iNDAiIHI9IjIuNCIgZmlsbD0iI2M5ZjVkOSIgc3Ryb2tlPSJub25lIi8+CiAgICA8bGluZSB4MT0iOCIgeTE9IjIwIiB4Mj0iMTYiIHkyPSIyMCIvPgogICAgPGxpbmUgeDE9IjgiIHkxPSIzMiIgeDI9IjE2IiB5Mj0iMzIiLz4KICAgIDxsaW5lIHgxPSI4IiB5MT0iNDQiIHgyPSIxNiIgeTI9IjQ0Ii8+CiAgICA8bGluZSB4MT0iNDgiIHkxPSIyMCIgeDI9IjU2IiB5Mj0iMjAiLz4KICAgIDxsaW5lIHgxPSI0OCIgeTE9IjMyIiB4Mj0iNTYiIHkyPSIzMiIvPgogICAgPGxpbmUgeDE9IjQ4IiB5MT0iNDQiIHgyPSI1NiIgeTI9IjQ0Ii8+CiAgPC9nPgo8L3N2Zz4K",
+  "templates": {
+    "user-data": {
+      "filename": "user-data",
+      "content": "#cloud-config\nhostname: __hostname__\nmanage_etc_hosts: true\ntimezone: __timezone__\n\nusers:\n  - name: __username__\n    groups: [sudo, users]\n    shell: /bin/bash\n    lock_passwd: false\n    plain_text_passwd: \"__password__\"\n    expiredate: \"__expire_date__\"\n    ssh_authorized_keys:\n__ssh_authorized_keys__\n\npackage_update: true\npackage_upgrade: true\n",
+      "fields": [
+        {
+          "name": "Hostname",
+          "key": "hostname",
+          "type": "hostname",
+          "required": true,
+          "default": "raspberrypi",
+          "description": "Device hostname, used for both cloud-init's hostname module and meta-data."
+        },
+        {
+          "name": "Timezone",
+          "key": "timezone",
+          "type": "enum",
+          "required": true,
+          "default": "Etc/UTC",
+          "restrictions": {
+            "options": [
+              "Etc/UTC",
+              "Europe/Berlin",
+              "Europe/London",
+              "America/New_York",
+              "America/Los_Angeles",
+              "Asia/Tokyo",
+              "Australia/Sydney"
+            ]
+          }
+        },
+        {
+          "name": "Username",
+          "key": "username",
+          "type": "string",
+          "required": true,
+          "default": "pi",
+          "restrictions": {
+            "pattern": "^[a-z_][a-z0-9_\\-]{0,31}$",
+            "patternMessage": "Must be a valid Linux username (lowercase letters, digits, _ or -, starting with a letter or _)."
+          }
+        },
+        {
+          "name": "Password",
+          "key": "password",
+          "type": "password",
+          "required": false,
+          "description": "Plain-text login password (cloud-init sets it on first boot). Leave empty to disable password login and rely on SSH keys only.",
+          "restrictions": {
+            "minLength": 8
+          }
+        },
+        {
+          "name": "Password expiry date",
+          "key": "expire_date",
+          "type": "date",
+          "required": false,
+          "description": "Force a password change after this date. Leave empty for no expiry."
+        },
+        {
+          "name": "SSH authorized keys",
+          "key": "ssh_authorized_keys",
+          "type": "ssh-pubkey-list",
+          "required": true,
+          "description": "One public key per line (ssh-rsa, ssh-ed25519, ecdsa-sha2-*, …).",
+          "restrictions": {
+            "indent": 6
+          }
+        }
+      ]
+    },
+    "meta-data": {
+      "filename": "meta-data",
+      "content": "instance-id: __instance_id__\nlocal-hostname: __hostname__\n",
+      "fields": [
+        {
+          "name": "Instance ID",
+          "key": "instance_id",
+          "type": "uuid",
+          "required": true,
+          "description": "Unique per deployment — changing it forces cloud-init to re-run on next boot."
+        },
+        {
+          "name": "Hostname",
+          "key": "hostname",
+          "type": "hostname",
+          "required": true,
+          "default": "raspberrypi"
+        }
+      ]
+    },
+    "network-config": {
+      "filename": "network-config",
+      "content": "network:\n  version: 2\n  ethernets:\n    eth0:\n      dhcp4: false\n      addresses:\n        - __ip__/__prefix_length__\n      gateway4: __gateway__\n      nameservers:\n        addresses: [__dns__]\n",
+      "fields": [
+        {
+          "name": "IP address",
+          "key": "ip",
+          "type": "ipv4",
+          "required": true,
+          "description": "Static IPv4 address for eth0."
+        },
+        {
+          "name": "Subnet prefix length",
+          "key": "prefix_length",
+          "type": "int",
+          "required": true,
+          "default": "24",
+          "restrictions": {
+            "min": 1,
+            "max": 32
+          }
+        },
+        {
+          "name": "Gateway",
+          "key": "gateway",
+          "type": "ipv4",
+          "required": false,
+          "description": "Leave empty on networks without a router."
+        },
+        {
+          "name": "DNS server",
+          "key": "dns",
+          "type": "ipv4",
+          "required": false,
+          "default": "1.1.1.1"
+        }
+      ]
+    }
+  }
+}

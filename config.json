@@ -1,0 +1,4 @@
+{
+  "name": "Cloud-Init Config",
+  "templates": "./templates"
+}
