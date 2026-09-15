@@ -1,0 +1,58 @@
+# Cloud-Init Config — Caddyfile
+#
+# Serves the app's production build (`pnpm run build` → dist/) with the strictest
+# Content-Security-Policy and companion security headers that still let the app work.
+# See ../README.md for a directive-by-directive explanation, and for why `connect-src`
+# can't be locked to 'self' unless you don't use "Add remote repo".
+#
+# Usage: replace the hostname below and `root`'s path (point it at dist/), then
+# run/reload Caddy with this file (or paste the site block into your existing
+# Caddyfile). Caddy obtains and renews a TLS certificate automatically for a real,
+# publicly-resolvable hostname. `file_server` already serves /editor/ as
+# editor/index.html — no rewrite rules needed since the editor is a real static page,
+# not a client-side route.
+
+cloud-init-config.example.internal {
+    root * /var/www/cloud-init-config
+    file_server
+
+    header {
+        # connect-src allows same-origin plus any https: host because "Add remote
+        # repo" lets the user fetch an arbitrary index.json/template URL by design —
+        # there is no way to know those hosts in advance. If you never use that
+        # feature, change this to `connect-src 'self';` to lock fetches to this
+        # origin only.
+        Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'none'; connect-src 'self' https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; media-src 'none'; child-src 'none'; upgrade-insecure-requests"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+        Cross-Origin-Opener-Policy "same-origin"
+        Cross-Origin-Embedder-Policy "require-corp"
+        Cross-Origin-Resource-Policy "same-origin"
+        Permissions-Policy "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), usb=(), xr-spatial-tracking=()"
+        Strict-Transport-Security "max-age=63072000; includeSubDomains"
+        # Stop Caddy announcing its own name/version.
+        -Server
+    }
+}
+
+# Internal/LAN, no TLS: Caddy will not obtain a certificate for a bare IP or a
+# hostname it can't verify via ACME, so use a plain `http://` address instead and drop
+# Strict-Transport-Security + "upgrade-insecure-requests" from the CSP above (both
+# assume HTTPS is in use). Uncomment and adjust:
+#
+# http://cloud-init-config.internal.lan {
+#     root * /var/www/cloud-init-config
+#     file_server
+#     header {
+#         Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'none'; connect-src 'self' https:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; worker-src 'none'; manifest-src 'none'; media-src 'none'; child-src 'none'"
+#         X-Content-Type-Options "nosniff"
+#         X-Frame-Options "DENY"
+#         Referrer-Policy "no-referrer"
+#         Cross-Origin-Opener-Policy "same-origin"
+#         Cross-Origin-Embedder-Policy "require-corp"
+#         Cross-Origin-Resource-Policy "same-origin"
+#         Permissions-Policy "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), usb=(), xr-spatial-tracking=()"
+#         -Server
+#     }
+# }

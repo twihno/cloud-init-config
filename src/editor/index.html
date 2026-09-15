@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configure template – Cloud-Init Config</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header id="app-header">
+      <div class="header-inner">
+        <div class="header-title">
+          <a href="/" id="btn-back" class="btn btn-ghost">&larr; Back</a>
+        </div>
+        <div class="header-actions">
+          <div class="header-actions-group">
+            <span id="replace-disk-hint" class="muted"></span>
+            <button type="button" id="btn-replace-disk" class="btn btn-danger">
+              Replace files on boot partition&hellip;
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="view-editor">
+      <div id="editor-load-error" class="banner banner-error" hidden></div>
+      <div id="editor-content" hidden>
+        <div class="editor-header">
+          <img id="editor-icon" class="template-icon" alt="" hidden />
+          <div>
+            <h2 id="editor-title"></h2>
+            <p id="editor-meta" class="muted"></p>
+          </div>
+        </div>
+        <div class="editor-tabs" role="group" aria-label="Editor view">
+          <button type="button" id="tab-config" class="btn btn-ghost" aria-pressed="true">
+            Configuration
+          </button>
+          <button type="button" id="tab-preview" class="btn btn-ghost" aria-pressed="false">
+            Preview
+          </button>
+        </div>
+        <div class="editor-body">
+          <aside id="config-form-panel">
+            <h3>Configuration</h3>
+            <form id="config-form" autocomplete="off"></form>
+          </aside>
+          <section id="preview-panel">
+            <div id="preview-cards"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="/editor-main.ts"></script>
+  </body>
+</html>

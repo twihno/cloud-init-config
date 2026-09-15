@@ -1,0 +1,74 @@
+name: Release
+
+# Builds the static site (TypeScript + Vite) once per published release, then:
+#   1. zips the production output and attaches it to the release, and
+#   2. deploys that same build to GitHub Pages.
+#
+# GitHub Pages must be enabled once, manually, before this can deploy: repo Settings ->
+# Pages -> "Build and deployment" -> Source: "GitHub Actions". The build is root-relative
+# (Vite's default `base: "/"`), so Pages needs to serve it at the domain root — either a
+# `<user>.github.io` user/org page, or a project page with a custom domain (add a
+# `public/CNAME` file with that domain, or set it in repo Settings -> Pages).
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Zip deployment files
+        run: |
+          cd dist
+          zip -r "../cloud-init-config-${{ github.event.release.tag_name }}.zip" .
+
+      - name: Upload zip to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "cloud-init-config-${{ github.event.release.tag_name }}.zip" \
+            --clobber
+
+      - name: Add example repo to pages
+        run: cp -r deployment/examples/templates dist/example_repo
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy-pages:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

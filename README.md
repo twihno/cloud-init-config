@@ -6,11 +6,11 @@ It does **not** generate templates — someone writes those ahead of time (see
 gets the result onto a device.
 
 > [!NOTE]
-> **This project is 100% vibe-coded.** Every line of HTML/CSS/JS here, this README, and
+> **This project is 100% vibe-coded.** Every line of TypeScript/CSS here, this README, and
 > `TEMPLATE_SCHEMA.md` were written by Claude (Anthropic) from a conversational spec, with
-> no hand-written code. It has been syntax-checked and logic-tested (validators, template
-> rendering) but has **not** been exercised end-to-end in a real browser. Review it before
-> trusting it with real infrastructure, especially the disk-writing export path.
+> no hand-written code. It has been syntax-checked, type-checked, and logic-tested
+> (validators, template rendering), and exercised end-to-end in a real browser. Review it
+> before trusting it with real infrastructure, especially the disk-writing export path.
 
 ## Human preamble
 
@@ -20,24 +20,24 @@ We needed a simple tool to customize our cloud init files more or less only for 
 This makes this easy, reproducible and less error-prone.
 Idk. Use it if you want.
 
-And also from a technical standpoint: Yes, this could use a bundler, typescript and everything.
-Would load better and produce smaller files. We only plan to deploy this on an internal server
-and use it sparsely so loading multiple files is somewhat irrelevant.
-
 ## Features
 
 - **Three sources of templates**, shown as cards you can switch between grid/list view:
   - **Local configs** — template files you drag-and-drop or pick from disk, kept only in
     this browser (IndexedDB).
   - **Site templates** — the repo bundled with this site (via `config.json`), force-refreshed
-    on every page load.
+    on every page load. Entirely optional: omit `templates` from `config.json` and this
+    section doesn't appear at all.
   - **Remote repos** — any URL serving an `index.json` in the same format. Checked for
     updates on every load; template bodies only download when you hit **Sync**.
+- **The editor has its own URL** (`/editor/?source=...`), so opening a template, using the
+  browser's back/forward buttons, and reloading mid-edit all work normally — no client-side
+  router, still a fully static build.
 - **Validated fields** for IPv4/IPv6, CIDR, MAC, hostnames/FQDNs, ports, UUIDs, dates and
   RFC 3339 timestamps, SSH public keys (RSA/Ed25519/ECDSA/…), base64, JSON, and more —
   see the full list in [TEMPLATE_SCHEMA.md](TEMPLATE_SCHEMA.md#field-types).
 - **Live, syntax-highlighted preview** of every rendered output file as you type (YAML
-  highlighting via a vendored highlight.js, see [Project layout](#project-layout)).
+  highlighting via [highlight.js](https://highlightjs.org/)).
 - **Four export paths**: copy as text, copy as base64 (handy for VMware guest metadata,
   etc.), save to disk, and a one-click **replace files on boot partition** that uses the
   File System Access API to write straight into a chosen folder — with a sanity check that
@@ -49,17 +49,26 @@ and use it sparsely so loading multiple files is somewhat irrelevant.
 
 ## Quick start
 
-This is a static site: any web server works, as long as it serves the directory over
-`http://` or `https://` (not `file://` — IndexedDB, the Clipboard API, and the File System
-Access API all require a proper origin).
+Requires [pnpm](https://pnpm.io/) (version pinned in `package.json`; if you have
+[Vite+](https://viteplus.dev/) installed, `vp install` downloads it for you automatically).
 
 ```sh
-python3 -m http.server 8080
-# or: npx serve .
+pnpm install
+pnpm dev          # dev server with hot reload
+pnpm build        # type-checks, then builds the static site into dist/
+pnpm preview      # serve the dist/ build locally
 ```
 
-Then open `http://localhost:8080`. To deploy, upload the whole directory (including
-`templates/`) to any static host.
+The result (`dist/`) is a static site: any web server works, as long as it serves the
+directory over `http://` or `https://` (not `file://` — IndexedDB, the Clipboard API, and
+the File System Access API all require a proper origin). To deploy, upload the whole
+`dist/` directory to any static host — see [deployment/](deployment/) for reference nginx
+and Caddy configs.
+
+Publishing a GitHub release also builds and attaches a deployment zip, and deploys the
+same build to GitHub Pages — see [.github/workflows/release.yml](.github/workflows/release.yml)
+(GitHub Pages needs to be switched to the "GitHub Actions" source once, in repo Settings ->
+Pages, before the first deploy).
 
 ## Using it
 
@@ -74,9 +83,10 @@ Then open `http://localhost:8080`. To deploy, upload the whole directory (includ
 4. **Sync** — remote repos are flagged "update available" automatically when their
    `index.json`'s `last_update` moves past what you last synced; click **Sync now** /
    **Re-sync** on that repo, or **Sync remotes** in the header to sync everything at once.
-5. **Configure** — click a template card to open the editor: your inputs on the left
-   (validated as you type, with inline error messages), the rendered output files on the
-   right, updating live.
+5. **Configure** — click a template card to open the editor at its own URL (e.g.
+   `/editor/?source=site&path=/raspberry1.json`): your inputs on the left (validated as
+   you type, with inline error messages), the rendered output files on the right, updating
+   live. The browser's back button returns you to the browse view.
 6. **Export** — per file: copy as text, copy as base64, or save to disk. For the whole set
    at once: **Replace files on boot partition…**, which asks for a folder (e.g. a
    Raspberry Pi's boot partition) and writes every file into it after checking it actually
@@ -84,9 +94,9 @@ Then open `http://localhost:8080`. To deploy, upload the whole directory (includ
 
 ## Requirements
 
-Targets current Chrome, Firefox, and Safari on developer machines — no polyfills, no build
-step. A few things degrade gracefully or are simply unavailable on older/unsupported
-browsers:
+Targets current Chrome, Firefox, and Safari on developer machines — no polyfills, and the
+build step is dev-time only (the shipped output is plain HTML/CSS/JS). A few things
+degrade gracefully or are simply unavailable on older/unsupported browsers:
 
 - **File System Access API** (`showDirectoryPicker`) is needed for "Replace files on boot
   partition"; where it's missing, that button is disabled with an explanation and you fall
@@ -96,29 +106,45 @@ browsers:
 
 ## Project layout
 
+`src/` is the Vite project root (see `root` in `vite.config.ts`), so it holds both pages
+and all the app code; `public/` holds files served as-is at the site root, outside the
+build. TypeScript files import each other via the `@/` alias (`@/store.ts` etc.), which
+resolves to `src/`.
+
 ```text
-config.json              site config: page name + path to the bundled template repo
-templates/                the site's own template repo
-  index.json               repo index (template list + last_update)
-  raspberry1.json           example template (Raspberry Pi cloud-init)
-index.html / style.css    shell + theme
-js/
-  app.js                   state, wiring, page init
-  store.js                 IndexedDB-backed repo/template fetching & caching
-  db.js                    thin IndexedDB promise wrapper
-  validators.js            field type registry + validation
-  templater.js             field de-duplication, `__key__` substitution, shape checks
-  editor.js                configuration form + live preview panel
-  render-browse.js         card/section rendering for the browse view
-  modals.js                add-local / add-remote dialogs
-  confirm.js               themed replacement for window.confirm()
-  export.js                copy/save/replace-on-disk
-  dom.js                   tiny safe DOM-builder + contact-link/icon helpers
-  syntax-highlight.js      wrapper around the vendored highlight.js below
-  highlight/               vendored highlight.js 11.x (BSD-3-Clause), core + YAML grammar
-                            only — see js/highlight/LICENSE
-TEMPLATE_SCHEMA.md        schema reference for config.json / index.json / template files
+public/
+  config.json               site config: page name + (optional) path to the bundled template repo
+  templates/                 the site's own template repo
+    index.json                repo index (template list + last_update)
+    raspberry1.json            example template (Raspberry Pi cloud-init)
+  favicon.svg
+src/
+  index.html                browse view (site root)
+  editor/index.html          editor view, at /editor/ — template selected via ?source=... query params
+  main.ts                    browse page: state, wiring, page init
+  editor-main.ts              editor page: resolves ?source=... to a template, mounts the editor
+  routes.ts                  encodes/decodes the editor URL's query params
+  site.ts                    loads config.json + the (optional) site template repo
+  store.ts                   IndexedDB-backed repo/template fetching & caching
+  db.ts                      thin typed IndexedDB promise wrapper
+  validators.ts              field type registry + validation
+  templater.ts                field de-duplication, `__key__` substitution, shape checks
+  editor.ts                   configuration form + live preview panel
+  render-browse.ts            card/section rendering for the browse view
+  modals.ts                   add-local / add-remote dialogs
+  confirm.ts                   themed replacement for window.confirm()
+  export.ts                   copy/save/replace-on-disk
+  dom.ts                      tiny safe DOM-builder + contact-link/icon helpers
+  syntax-highlight.ts          wrapper around highlight.js (npm dependency), core + YAML grammar only
+  types.ts                    shared TypeScript types for config.json / index.json / template files
+  style.css                   shell + theme
+vite.config.ts              multi-page build (src/index.html + src/editor/index.html), @ alias, public dir
+TEMPLATE_SCHEMA.md          schema reference for config.json / index.json / template files
 ```
+
+`pnpm build` type-checks `src/` and bundles everything above into a static `dist/`
+directory (`dist/index.html`, `dist/editor/`, `dist/assets/`, plus `config.json` and
+`templates/` copied as-is from `public/`).
 
 ## Writing templates
 

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud-Init Config</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header id="app-header">
+      <div class="header-inner">
+        <div class="header-title">
+          <h1 id="site-title">Cloud-Init Config</h1>
+        </div>
+        <div class="header-actions">
+          <div class="header-actions-group">
+            <div class="layout-toggle" role="group" aria-label="Card layout">
+              <button
+                type="button"
+                id="btn-layout-grid"
+                class="btn btn-icon"
+                aria-pressed="true"
+                title="Tile view"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                >
+                  <rect x="2" y="2" width="7" height="7" rx="1.5" />
+                  <rect x="11" y="2" width="7" height="7" rx="1.5" />
+                  <rect x="2" y="11" width="7" height="7" rx="1.5" />
+                  <rect x="11" y="11" width="7" height="7" rx="1.5" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="btn-layout-list"
+                class="btn btn-icon"
+                aria-pressed="false"
+                title="List view"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                >
+                  <line x1="3" y1="5" x2="17" y2="5" />
+                  <line x1="3" y1="10" x2="17" y2="10" />
+                  <line x1="3" y1="15" x2="17" y2="15" />
+                </svg>
+              </button>
+            </div>
+            <button type="button" id="btn-sync-all" class="btn btn-ghost">Sync remotes</button>
+            <button type="button" id="btn-add-remote" class="btn btn-ghost">+ Remote repo</button>
+            <button type="button" id="btn-add-local" class="btn btn-primary">+ Local config</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="view-browse">
+      <div id="global-message" class="banner" hidden></div>
+      <div id="browse-sections"></div>
+    </main>
+
+    <dialog id="modal-add-local">
+      <form method="dialog" class="modal-form" autocomplete="off">
+        <h2>Add local config</h2>
+        <p class="muted">
+          Import one or more template JSON files from disk. They are stored only in this browser.
+        </p>
+        <label id="dropzone" for="local-file-input" class="dropzone">
+          <span>Drag &amp; drop template files here, or click to choose</span>
+          <input
+            type="file"
+            id="local-file-input"
+            accept="application/json,.json"
+            multiple
+            hidden
+          />
+        </label>
+        <ul id="local-import-results" class="import-results"></ul>
+        <div class="modal-actions">
+          <button type="button" id="btn-close-local-modal" class="btn btn-ghost">Done</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="modal-add-remote">
+      <form method="dialog" class="modal-form" autocomplete="off">
+        <h2>Add remote repository</h2>
+        <p class="muted">
+          Point to a folder containing an <code>index.json</code> (same format as this site's own
+          templates).
+        </p>
+        <div class="field">
+          <label for="remote-url-input">Repository URL</label>
+          <input
+            type="url"
+            id="remote-url-input"
+            placeholder="https://example.com/cloud-init-templates"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="btn-fetch-remote-preview" class="btn btn-primary">
+            Fetch preview
+          </button>
+        </div>
+        <div id="remote-preview" hidden>
+          <h3 id="remote-preview-name"></h3>
+          <p id="remote-preview-meta" class="muted"></p>
+          <div id="remote-preview-cards" class="card-grid preview-card-grid"></div>
+          <ul id="remote-preview-errors" class="import-results"></ul>
+        </div>
+        <div id="remote-error" class="field-error" hidden></div>
+        <div class="modal-actions">
+          <button type="button" id="btn-cancel-remote-modal" class="btn btn-ghost">Cancel</button>
+          <button type="button" id="btn-confirm-add-remote" class="btn btn-primary" disabled>
+            Add repository
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

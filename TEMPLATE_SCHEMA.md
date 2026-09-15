@@ -16,8 +16,10 @@ Fetched fresh on every page load.
 ```
 
 - `name` (optional) — shown as the page title.
-- `templates` — path to this site's own bundled template repo (a folder containing an
-  `index.json` in the format below). Always force-refreshed on load, no caching negotiation.
+- `templates` (optional) — path to this site's own bundled template repo (a folder
+  containing an `index.json` in the format below). Always force-refreshed on load, no
+  caching negotiation. If omitted, the site has no bundled repo and the "Site Templates"
+  section doesn't appear on the homepage at all — only Local configs and Remote repos.
 
 ## Repo `index.json` (site repo and any remote repo)
 
