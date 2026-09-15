@@ -8,63 +8,73 @@
   </head>
   <body>
     <header id="app-header">
-      <div class="header-title">
-        <h1 id="site-title">Cloud-Init Config</h1>
-        <p id="site-subtitle" class="muted"></p>
-      </div>
-      <div class="header-actions">
-        <div class="layout-toggle" role="group" aria-label="Card layout">
-          <button
-            type="button"
-            id="btn-layout-grid"
-            class="btn btn-icon"
-            aria-pressed="true"
-            title="Tile view"
-          >
-            <svg
-              viewBox="0 0 20 20"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <rect x="2" y="2" width="7" height="7" rx="1.5" />
-              <rect x="11" y="2" width="7" height="7" rx="1.5" />
-              <rect x="2" y="11" width="7" height="7" rx="1.5" />
-              <rect x="11" y="11" width="7" height="7" rx="1.5" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            id="btn-layout-list"
-            class="btn btn-icon"
-            aria-pressed="false"
-            title="List view"
-          >
-            <svg
-              viewBox="0 0 20 20"
-              width="18"
-              height="18"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <line x1="3" y1="5" x2="17" y2="5" />
-              <line x1="3" y1="10" x2="17" y2="10" />
-              <line x1="3" y1="15" x2="17" y2="15" />
-            </svg>
-          </button>
+      <div class="header-inner">
+        <div class="header-title">
+          <h1 id="site-title">Cloud-Init Config</h1>
+          <p id="site-subtitle" class="muted"></p>
         </div>
-        <button type="button" id="btn-sync-all" class="btn btn-ghost">
-          Sync remotes
-        </button>
-        <button type="button" id="btn-add-remote" class="btn btn-ghost">
-          + Remote repo
-        </button>
-        <button type="button" id="btn-add-local" class="btn btn-primary">
-          + Local config
-        </button>
+        <div class="header-actions">
+          <div id="browse-header-actions" class="header-actions-group">
+            <div class="layout-toggle" role="group" aria-label="Card layout">
+              <button
+                type="button"
+                id="btn-layout-grid"
+                class="btn btn-icon"
+                aria-pressed="true"
+                title="Tile view"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                >
+                  <rect x="2" y="2" width="7" height="7" rx="1.5" />
+                  <rect x="11" y="2" width="7" height="7" rx="1.5" />
+                  <rect x="2" y="11" width="7" height="7" rx="1.5" />
+                  <rect x="11" y="11" width="7" height="7" rx="1.5" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                id="btn-layout-list"
+                class="btn btn-icon"
+                aria-pressed="false"
+                title="List view"
+              >
+                <svg
+                  viewBox="0 0 20 20"
+                  width="18"
+                  height="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                >
+                  <line x1="3" y1="5" x2="17" y2="5" />
+                  <line x1="3" y1="10" x2="17" y2="10" />
+                  <line x1="3" y1="15" x2="17" y2="15" />
+                </svg>
+              </button>
+            </div>
+            <button type="button" id="btn-sync-all" class="btn btn-ghost">
+              Sync remotes
+            </button>
+            <button type="button" id="btn-add-remote" class="btn btn-ghost">
+              + Remote repo
+            </button>
+            <button type="button" id="btn-add-local" class="btn btn-primary">
+              + Local config
+            </button>
+          </div>
+          <div id="editor-header-actions" class="header-actions-group" hidden>
+            <span id="replace-disk-hint" class="muted"></span>
+            <button type="button" id="btn-replace-disk" class="btn btn-danger">
+              Replace files on boot partition&hellip;
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -90,12 +100,6 @@
           <form id="config-form" autocomplete="off"></form>
         </aside>
         <section id="preview-panel">
-          <div class="preview-actions-global">
-            <button type="button" id="btn-replace-disk" class="btn btn-danger">
-              Replace files on boot partition&hellip;
-            </button>
-            <span id="replace-disk-hint" class="muted"></span>
-          </div>
           <div id="preview-cards"></div>
         </section>
       </div>

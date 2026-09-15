@@ -98,30 +98,7 @@ export function renderBrowseView(root, state, handlers) {
 
   root.appendChild(
     renderSection({
-      title: "Local configs",
-      subtitle: "Imported into this browser — not shared with anyone.",
-      status: null,
-      layout: state.layout,
-      cards: state.localTemplates.map((rec) =>
-        renderTemplateCard({
-          template: rec.template,
-          onSelect: () =>
-            handlers.onSelect({
-              source: "local",
-              id: rec.id,
-              template: rec.template,
-            }),
-          onRemove: () => handlers.onRemoveLocal(rec.id),
-          removeTitle: "Remove local config",
-        }),
-      ),
-      empty: 'No local configs yet. Use "+ Local config" to import one.',
-    }),
-  );
-
-  root.appendChild(
-    renderSection({
-      title: state.siteMeta?.index?.name || "Site templates",
+      title: state.siteMeta?.index?.name || "Site Templates",
       subtitle: siteSubtitle(state),
       status: state.siteStatus,
       statusText: {
@@ -147,6 +124,29 @@ export function renderBrowseView(root, state, handlers) {
           ? "Loading…"
           : "No site templates available.",
       errorText: state.siteError,
+    }),
+  );
+
+  root.appendChild(
+    renderSection({
+      title: "Local configs",
+      subtitle: "Imported into this browser — not shared with anyone.",
+      status: null,
+      layout: state.layout,
+      cards: state.localTemplates.map((rec) =>
+        renderTemplateCard({
+          template: rec.template,
+          onSelect: () =>
+            handlers.onSelect({
+              source: "local",
+              id: rec.id,
+              template: rec.template,
+            }),
+          onRemove: () => handlers.onRemoveLocal(rec.id),
+          removeTitle: "Remove local config",
+        }),
+      ),
+      empty: 'No local configs yet. Use "+ Local config" to import one.',
     }),
   );
 

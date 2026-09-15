@@ -24,6 +24,8 @@ const dom = {
   browseSections: document.getElementById("browse-sections"),
   viewBrowse: document.getElementById("view-browse"),
   viewEditor: document.getElementById("view-editor"),
+  browseHeaderActions: document.getElementById("browse-header-actions"),
+  editorHeaderActions: document.getElementById("editor-header-actions"),
   btnBack: document.getElementById("btn-back"),
   btnLayoutGrid: document.getElementById("btn-layout-grid"),
   btnLayoutList: document.getElementById("btn-layout-list"),
@@ -59,6 +61,8 @@ function render() {
 function switchView(view) {
   dom.viewBrowse.hidden = view !== "browse";
   dom.viewEditor.hidden = view !== "editor";
+  dom.browseHeaderActions.hidden = view !== "browse";
+  dom.editorHeaderActions.hidden = view !== "editor";
 }
 
 function openEditor(selection) {

@@ -99,6 +99,24 @@ function buildInput(field, initialValue) {
   return { input, kind };
 }
 
+// Fields whose `__key__` token actually appears in a given sub-template's content —
+// used to scope the "are you sure?" warning to only the fields that file depends on.
+function fieldsUsedIn(content, fields) {
+  return fields.filter((f) => content.includes(`__${f.key}__`));
+}
+
+async function confirmIfIncomplete(invalidFields) {
+  if (!invalidFields.length) return true;
+  return confirmDialog({
+    title: "Some required fields are incomplete",
+    message: `${invalidFields.length} required field(s) are empty or invalid (${invalidFields
+      .map((f) => f.name || f.key)
+      .join(", ")}). The generated content may be incomplete or invalid.`,
+    confirmText: "Continue anyway",
+    danger: true,
+  });
+}
+
 function buildFieldRow(field, initialValue, onChange) {
   const { input, kind } = buildInput(field, initialValue);
   const errorEl = h("p", { class: "field-error", hidden: true });
@@ -185,6 +203,10 @@ export function mountEditor(refs, selection) {
     }
   }
 
+  function invalidFieldsFor(sub) {
+    return fieldsUsedIn(sub.content, fields).filter((f) => f.required !== false && errors[f.key]);
+  }
+
   function handleFieldChange(field, rawValue) {
     values[field.key] = rawValue;
     const result = validateField(field, rawValue);
@@ -235,8 +257,11 @@ export function mountEditor(refs, selection) {
           {
             type: "button",
             class: "btn btn-ghost btn-small",
-            onclick: () =>
-              copyText(pre.textContent).then(() => flash(card, "Copied")),
+            onclick: async () => {
+              if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
+              await copyText(pre.textContent);
+              flash(card, "Copied");
+            },
           },
           "Copy text",
         ),
@@ -245,8 +270,11 @@ export function mountEditor(refs, selection) {
           {
             type: "button",
             class: "btn btn-ghost btn-small",
-            onclick: () =>
-              copyBase64(pre.textContent).then(() => flash(card, "Copied")),
+            onclick: async () => {
+              if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
+              await copyBase64(pre.textContent);
+              flash(card, "Copied");
+            },
           },
           "Copy base64",
         ),
@@ -255,7 +283,10 @@ export function mountEditor(refs, selection) {
           {
             type: "button",
             class: "btn btn-ghost btn-small",
-            onclick: () => downloadFile(filename, pre.textContent),
+            onclick: async () => {
+              if (!(await confirmIfIncomplete(invalidFieldsFor(sub)))) return;
+              downloadFile(filename, pre.textContent);
+            },
           },
           "Save to disk",
         ),
@@ -274,17 +305,7 @@ export function mountEditor(refs, selection) {
     const invalidRequired = fields.filter(
       (f) => f.required !== false && errors[f.key],
     );
-    if (invalidRequired.length) {
-      const proceed = await confirmDialog({
-        title: "Some required fields are incomplete",
-        message: `${invalidRequired.length} required field(s) are empty or invalid (${invalidRequired
-          .map((f) => f.name || f.key)
-          .join(", ")}). Writing now may produce a broken configuration.`,
-        confirmText: "Continue anyway",
-        danger: true,
-      });
-      if (!proceed) return;
-    }
+    if (!(await confirmIfIncomplete(invalidRequired))) return;
     const files = Object.entries(template.templates).map(([key, sub]) => ({
       filename: getSubTemplateFilename(key, sub),
       content: previewEls[key].textContent,

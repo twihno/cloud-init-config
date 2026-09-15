@@ -20,6 +20,10 @@ We needed a simple tool to customize our cloud init files more or less only for 
 This makes this easy, reproducible and less error-prone.
 Idk. Use it if you want.
 
+And also from a technical standpoint: Yes, this could use a bundler, typescript and everything.
+Would load better and produce smaller files. We only plan to deploy this on an internal server
+and use it sparsely so loading multiple files is somewhat irrelevant.
+
 ## Features
 
 - **Three sources of templates**, shown as cards you can switch between grid/list view:
