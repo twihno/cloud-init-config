@@ -25,7 +25,7 @@ jobs:
       - name: Create release directory
         run: |
           mkdir build && \
-          cp index.html \
+          cp -r index.html \
             style.css \
             config.json \
             js \
