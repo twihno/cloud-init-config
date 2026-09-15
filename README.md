@@ -12,6 +12,14 @@ gets the result onto a device.
 > rendering) but has **not** been exercised end-to-end in a real browser. Review it before
 > trusting it with real infrastructure, especially the disk-writing export path.
 
+## Human preamble
+
+I don't know what to write here: Yes, this is 100% AI slop and vibe coded.
+This isn't perfect. This somewhat shouldn't exist.
+We needed a simple tool to customize our cloud init files more or less only for some of our raspberry pis.
+This makes this easy, reproducible and less error-prone.
+Idk. Use it if you want.
+
 ## Features
 
 - **Three sources of templates**, shown as cards you can switch between grid/list view:
