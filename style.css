@@ -558,6 +558,38 @@ main {
   scrollbar-width: thin;
   scrollbar-color: var(--preview-border) transparent;
 }
+
+/* highlight.js YAML tokens (js/highlight/, vendored) — colors picked to sit on the
+   fixed dark .preview-card background above, not on either site theme. */
+.preview-content .hljs-attr {
+  color: #7dd3fc;
+}
+.preview-content .hljs-string {
+  color: #a6e3a1;
+}
+.preview-content .hljs-number {
+  color: #f2cc60;
+}
+.preview-content .hljs-literal {
+  color: #c792ea;
+  font-weight: 600;
+}
+.preview-content .hljs-type {
+  color: #4fd1c5;
+}
+.preview-content .hljs-bullet {
+  color: #7c85a3;
+}
+.preview-content .hljs-meta {
+  color: #6b7280;
+}
+.preview-content .hljs-comment {
+  color: #6b7280;
+  font-style: italic;
+}
+.preview-content .hljs-template-variable {
+  color: #f78fb3;
+}
 .preview-card-actions {
   display: flex;
   gap: 0.5rem;

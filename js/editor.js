@@ -7,6 +7,7 @@ import {
   isDirectoryPickerSupported,
   replaceOnDisk,
 } from "./export.js";
+import { highlightYaml } from "./syntax-highlight.js";
 import {
   getDedupedFields,
   getSubTemplateFilename,
@@ -195,11 +196,11 @@ export function mountEditor(refs, selection) {
 
   function updateAllPreviews() {
     for (const key of Object.keys(template.templates)) {
-      previewEls[key].textContent = renderContent(
-        template.templates[key].content,
-        fields,
-        values,
-      );
+      const rendered = renderContent(template.templates[key].content, fields, values);
+      // innerHTML here is highlight.js's own escaped token markup, not raw content — see
+      // syntax-highlight.js. previewEls[key].textContent (used for copy/save) still comes
+      // back as the exact plain rendered string regardless of these tags.
+      previewEls[key].innerHTML = highlightYaml(rendered);
     }
   }
 

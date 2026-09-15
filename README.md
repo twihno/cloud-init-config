@@ -36,7 +36,8 @@ and use it sparsely so loading multiple files is somewhat irrelevant.
 - **Validated fields** for IPv4/IPv6, CIDR, MAC, hostnames/FQDNs, ports, UUIDs, dates and
   RFC 3339 timestamps, SSH public keys (RSA/Ed25519/ECDSA/…), base64, JSON, and more —
   see the full list in [TEMPLATE_SCHEMA.md](TEMPLATE_SCHEMA.md#field-types).
-- **Live preview** of every rendered output file as you type.
+- **Live, syntax-highlighted preview** of every rendered output file as you type (YAML
+  highlighting via a vendored highlight.js, see [Project layout](#project-layout)).
 - **Four export paths**: copy as text, copy as base64 (handy for VMware guest metadata,
   etc.), save to disk, and a one-click **replace files on boot partition** that uses the
   File System Access API to write straight into a chosen folder — with a sanity check that
@@ -112,7 +113,10 @@ js/
   modals.js                add-local / add-remote dialogs
   confirm.js               themed replacement for window.confirm()
   export.js                copy/save/replace-on-disk
-  dom.js                   tiny safe DOM-builder + contact-link helper
+  dom.js                   tiny safe DOM-builder + contact-link/icon helpers
+  syntax-highlight.js      wrapper around the vendored highlight.js below
+  highlight/               vendored highlight.js 11.x (BSD-3-Clause), core + YAML grammar
+                            only — see js/highlight/LICENSE
 TEMPLATE_SCHEMA.md        schema reference for config.json / index.json / template files
 ```
 
